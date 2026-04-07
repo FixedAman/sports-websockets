@@ -1,11 +1,12 @@
 import { WebSocket, WebSocketServer } from "ws";
+import { tuple } from "zod";
 function sendJSON(socket, payload) {
   if (socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(payload));
 }
 function broadcast(wss, payload) {
   for (const client of wss.clients) {
-    if (client.readyState !== WebSocket.OPEN) return;
+    if (client.readyState !== WebSocket.OPEN) continue;
     client.send(JSON.stringify(payload));
   }
 }
@@ -18,14 +19,25 @@ export function attachWebSocketServer(server) {
     maxPayload: 1024 * 1024,
   });
 
+  // adding hearbeat mechanism
   wss.on("connection", (socket) => {
+    //creating isAlive variable
+    socket.isAlive = true;
+    socket.on("pong", () => {
+      socket.isAlive = true;
+    });
     sendJSON(socket, { type: "Welocome" });
     socket.on("error", console.error);
-    socket.on("message", (msg) => {
-      console.log("received message: ", msg.toString());
-    });
-    socket.on("close", (code, reason) => {
-      console.log(`closing message : ${code}: `, reason.toString());
+
+    const interval = setInterval(() => {
+      wss.clients.forEach((ws) => {
+        if (ws.isAlive === false) return ws.terminate();
+        ws.isAlive = false;
+        ws.ping();
+      });
+    }, 3000);
+    socket.on("close", () => {
+      clearInterval(interval);
     });
   });
   function broadcastMatchCreated(match) {
