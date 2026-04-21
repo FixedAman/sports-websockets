@@ -1,5 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { tuple } from "zod";
+import { codec, tuple } from "zod";
+import { wsArcjet } from "../arcjet.js";
 function sendJSON(socket, payload) {
   if (socket.readyState !== WebSocket.OPEN) return;
   socket.send(JSON.stringify(payload));
@@ -20,7 +21,25 @@ export function attachWebSocketServer(server) {
   });
 
   // adding hearbeat mechanism
-  wss.on("connection", (socket) => {
+  wss.on("connection", async (socket, req) => {
+    // adding security checks
+    if (wsArcjet) {
+      try {
+        const decision = await wsArcjet.protect(req);
+        if (decision.isDenied()) {
+          const code = decision.reason.isRateLimit() ? 1013 : 1008;
+          const reason = decision.reason.isRateLimit()
+            ? "Time rate exceeded"
+            : "Access Denied";
+          socket.close(code, reason);
+          return;
+        }
+      } catch (error) {
+        console.error("something went on the server!", error);
+        socket.close(1011, "security error");
+        return;
+      }
+    }
     //creating isAlive variable
     socket.isAlive = true;
     socket.on("pong", () => {
