@@ -19,10 +19,8 @@ export function attachWebSocketServer(server) {
     path: "/ws",
     maxPayload: 1024 * 1024,
   });
-
-  // adding hearbeat mechanism
-  wss.on("connection", async (socket, req) => {
-    // adding security checks
+  // adding security checks
+  server.on("upgrade", async (req, socket) => {
     if (wsArcjet) {
       try {
         const decision = await wsArcjet.protect(req);
@@ -40,6 +38,10 @@ export function attachWebSocketServer(server) {
         return;
       }
     }
+  });
+
+  // adding hearbeat mechanism
+  wss.on("connection", (socket, req) => {
     //creating isAlive variable
     socket.isAlive = true;
     socket.on("pong", () => {

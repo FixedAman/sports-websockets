@@ -21,7 +21,7 @@ const isoDateString = z.string().refine((val) => !isNaN(Date.parse(val)), {
 export const createMatchSchema = z
   .object({
     sport: z.string().min(1),
-    homeTeam: z.string().min(1),
+    homeTeam: z.string().min(1), 
     awayTeam: z.string().min(1),
     startTime: isoDateString,
     endTime: isoDateString,

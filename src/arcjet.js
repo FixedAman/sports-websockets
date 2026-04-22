@@ -9,10 +9,10 @@ export const httpArcjet = arcjectKey
       key: arcjectKey,
       rules: [
         shield({ mode: arcjectMode }),
-        // detectBot({
-        //   mode: arcjectMode,
-        //   allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:PREVIEW"],
-        // }),
+        detectBot({
+          mode: arcjectMode,
+          allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:PREVIEW"],
+        }),
         slidingWindow({ mode: arcjectMode, interval: "10s", max: 50 }),
       ],
     })
