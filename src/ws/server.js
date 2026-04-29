@@ -14,13 +14,13 @@ function broadcast(wss, payload) {
 
 //attach of this  with actual server 8000
 export function attachWebSocketServer(server) {
-  const wss = new WebSocketServer({
-    server,
-    path: "/ws",
-    maxPayload: 1024 * 1024,
-  });
+  const wss = new WebSocketServer({ noServer: true });
   // adding security checks
-  server.on("upgrade", async (req, socket) => {
+  server.on("upgrade", async (req, socket, head) => {
+    if (req.url !== "/ws") {
+      socket.destroy();
+      return;
+    }
     if (wsArcjet) {
       try {
         const decision = await wsArcjet.protect(req);
@@ -29,15 +29,19 @@ export function attachWebSocketServer(server) {
           const reason = decision.reason.isRateLimit()
             ? "Time rate exceeded"
             : "Access Denied";
-          socket.close(code, reason);
+          socket.write(`HTTP/1.1 403 Forbidden\r\n\r\n`);
+          socket.destroy();
           return;
         }
       } catch (error) {
         console.error("something went on the server!", error);
-        socket.close(1011, "security error");
+        socket.destroy();
         return;
       }
     }
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req);
+    });
   });
 
   // adding hearbeat mechanism
