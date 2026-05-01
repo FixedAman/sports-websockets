@@ -18,7 +18,7 @@ matchRouter.get("/", async (req, res) => {
     });
   }
   const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
-  try {
+  try {   
     console.log(req.ip);
     const data = await db
       .select()
