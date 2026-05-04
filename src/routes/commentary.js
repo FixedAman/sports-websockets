@@ -53,16 +53,18 @@ commentaryRoute.post("/", async (req, res) => {
       .json({ error: "invalid body data", details: bodyResult.error.issues });
   }
   try {
-    const { minutes, ...rest } = bodyResult.data;
+    const { minute, ...rest } = bodyResult.data;
     const [result] = await db
       .insert(commentary)
       .values({
         matchId: paramResult.data.id,
-        minutes,
+        minute,
         ...rest,
       })
       .returning();
-
+    if (res.app.locals.broadcastCommentary) {
+      res.app.locals.broadcastCommentary(result.matchId, result);
+    }
     res.status(201).json({ data: result });
   } catch (error) {
     console.error("failed to create commentary", error);

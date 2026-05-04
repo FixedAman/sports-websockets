@@ -18,7 +18,7 @@ matchRouter.get("/", async (req, res) => {
     });
   }
   const limit = Math.min(parsed.data.limit ?? 50, MAX_LIMIT);
-  try {   
+  try {
     console.log(req.ip);
     const data = await db
       .select()
@@ -45,7 +45,7 @@ matchRouter.post("/", async (req, res) => {
     });
   }
   try {
-    const [event] = await db
+    const [match] = await db
       .insert(matches)
       .values({
         ...parsed.data,
@@ -57,9 +57,9 @@ matchRouter.post("/", async (req, res) => {
       })
       .returning();
     if (res.app.locals.broadcastMatchCreated) {
-      res.app.locals.broadcastMatchCreated(event);
+      res.app.locals.broadcastMatchCreated(match);
     }
-    res.status(201).json({ data: event });
+    res.status(201).json({ data: match });
   } catch (e) {
     return res
       .status(500)
