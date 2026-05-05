@@ -21,7 +21,7 @@ commentaryRoute.get("/", async (req, res) => {
   }
   try {
     const { id: matchId } = paramResult.data;
-    const { limit = 10 } = queryResult.data;
+    const { limit = MAX_LIMIT } = queryResult.data;
     const safeLimit = Math.min(limit, MAX_LIMIT);
     const result = await db
       .select()
