@@ -1,6 +1,6 @@
 import { desc, eq, inArray } from "drizzle-orm";
-import db from "../db/db";
-import { commentary } from "../db/schema";
+import db from "../db/db.js";
+import { commentary } from "../db/schema.js";
 
 // random players
 const players = [
@@ -41,7 +41,7 @@ const commentaryTemplates = [
       "Referee shows the yellow after a rough tackle.",
     ],
 
-    metadata: () => ({}),
+    metaData: () => ({}),
   },
   {
     eventType: "corner",
@@ -53,7 +53,7 @@ const commentaryTemplates = [
       "Dangerous ball whipped into the area.",
     ],
 
-    metadata: () => ({}),
+    metaData: () => ({}),
   },
   {
     eventType: "substitution",
@@ -65,7 +65,7 @@ const commentaryTemplates = [
       "Tactical substitution from the manager.",
     ],
 
-    metadata: () => ({
+    metaData: () => ({
       playerOff: players[Math.floor(Math.random() * players.length)],
     }),
   },
@@ -79,12 +79,12 @@ const commentaryTemplates = [
       "The referee stops play for a foul.",
     ],
 
-    metadata: () => ({}),
+    metaData: () => ({}),
   },
 ];
 
 // commentarystarting
-async function startCommentary(matchId, broadcastCommentary) {
+export  async function startCommentary(matchId, broadcastCommentary) {
   let minute = 1;
   let sequence = 1;
   async function generate() {
@@ -128,8 +128,8 @@ async function startCommentary(matchId, broadcastCommentary) {
         .orderBy(desc(commentary.createdAt));
 
       // cleanup rows
-      if (rows.length > 100) {
-        const rowsToDelete = rows.slice(100);
+      if (rows.length > 50) {
+        const rowsToDelete = rows.slice(50);
         await db.delete(commentary).where(
           inArray(
             commentary.id,
