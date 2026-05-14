@@ -1,6 +1,6 @@
-import { desc, eq, inArray } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import db from "../db/db.js";
-import { commentary } from "../db/schema.js";
+import { commentary, matches } from "../db/schema.js";
 
 // random players
 const players = [
@@ -13,8 +13,6 @@ const players = [
   "Neymar",
   "Lewandowski",
 ];
-// team random
-const teams = ["Fc Neon", "Cyber United"];
 // random commentary
 const commentaryTemplates = [
   {
@@ -84,7 +82,9 @@ const commentaryTemplates = [
 ];
 
 // commentarystarting
-export  async function startCommentary(matchId, broadcastCommentary) {
+export async function startCommentary(match, broadcastCommentary) {
+  let matchId = match.id;
+  const teams = [match.homeTeam, match.awayTeam];
   let minute = 1;
   let sequence = 1;
   async function generate() {
@@ -94,10 +94,35 @@ export  async function startCommentary(matchId, broadcastCommentary) {
         commentaryTemplates[
           Math.floor(Math.random() * commentaryTemplates.length)
         ];
+
       // random player
       const actor = players[Math.floor(Math.random() * players.length)];
       // random team
-      const team = teams[Math.floor(Math.random() * teams.length)];
+      // match index
+      const randomTeamIndex = Math.floor(Math.random() * teams.length);
+      const team = teams[randomTeamIndex];
+
+      if (template.eventType === "goal") {
+        if (randomTeamIndex === 0) {
+          await db
+            .update(matches)
+            .set({
+              homeScore: sql`${matches.homeScore} + 1`,
+            })
+            .where(eq(matches.id, matchId));
+        } else {
+          await db
+            .update(matches)
+            .set({ awayScore: sql`${matches.awayScore} + 1` })
+            .where(eq(matches.id, matchId));
+        }
+      }
+      // update score
+      const [updatedMatch] = await db
+        .select()
+        .from(matches)
+        .where(eq(matches.id, matchId));
+
       // random message
       const message =
         template.messages[Math.floor(Math.random() * template.messages.length)];
@@ -120,7 +145,13 @@ export  async function startCommentary(matchId, broadcastCommentary) {
         .values(commentaryData)
         .returning();
       // broadCast to the user
-      broadcastCommentary(matchId, savedCommentary);
+      broadcastCommentary(matchId, {
+        commentary: savedCommentary,
+        score: {
+          home: updatedMatch.homeScore,
+          away: updatedMatch.awayScore,
+        },
+      });
       const rows = await db
         .select({ id: commentary.id })
         .from(commentary)
