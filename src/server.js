@@ -8,6 +8,9 @@ import http from "http";
 import { attachWebSocketServer } from "./ws/server.js";
 import { securityMiddleware } from "./arcjet.js";
 import { commentaryRoute } from "./routes/commentary.js";
+import db from "./db/db.js";
+import { matches } from "./db/schema.js";
+import { startCommentary } from "./services/commentaryGenerator.js";
 const app = express();
 const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -27,9 +30,17 @@ const { broadcastMatchCreated, broadcastCommentary } =
 
 app.locals.broadcastMatchCreated = broadcastMatchCreated;
 app.locals.broadcastCommentary = broadcastCommentary;
-server.listen(PORT, HOST, () => {
+server.listen(PORT, HOST, async () => {
   const baseUrl =
     HOST === "0.0.0.0" ? `http://localhost:${PORT}` : `http://${HOST}:${PORT}`;
   console.log(`Server is running on ${baseUrl}`);
   console.log(`Websocket is running  on ${baseUrl.replace("http", "ws")}/ws`);
+
+  const allMatches = await db.select().from(matches);
+  if (allMatches) {
+    for (let match of allMatches) {
+      startCommentary(match, broadcastCommentary);
+    }
+  }
+  console.log("all matches : ", allMatches);
 });

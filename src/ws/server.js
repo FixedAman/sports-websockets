@@ -23,6 +23,7 @@ function subscribe(matchId, socket) {
     matchSubscribers.set(matchId, new Set());
   }
   matchSubscribers.get(matchId).add(socket);
+  
 }
 // server loading fixed
 function unsubscribe(matchId, socket) {
@@ -55,6 +56,7 @@ export function attachWebSocketServer(server) {
     broadcastToAll(wss, { type: "match_created", data: match });
   }
   function broadcastCommentary(matchId, comment) {
+   
     broadcastToMatch(matchId, { type: "commentary", data: comment });
   }
   //handle message
@@ -71,11 +73,6 @@ export function attachWebSocketServer(server) {
     if (message?.type === "subscribe" && Number.isInteger(message.matchId)) {
       subscribe(message.matchId, socket);
       socket.subscriptions.add(message.matchId);
-      if (!activeMatches.has(message.matchId)) {
-        let matchId = message.matchId;
-        startCommentary(matchId, broadcastCommentary);
-        activeMatches.add(matchId);
-      }
       sendJSON(socket, { type: "subscribed", matchId: message.matchId });
     }
     if (message?.type === "unsubscribe" && Number.isInteger(message.matchId)) {
