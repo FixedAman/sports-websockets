@@ -122,7 +122,7 @@ export async function startCommentary(match, broadcastCommentary) {
         .select()
         .from(matches)
         .where(eq(matches.id, matchId));
-
+      
       // random message
       const message =
         template.messages[Math.floor(Math.random() * template.messages.length)];
@@ -171,7 +171,7 @@ export async function startCommentary(match, broadcastCommentary) {
       minute++;
       sequence++;
       // random  delay
-      const delay = Math.random() * 5000 + 2000;
+      const delay = Math.random() * 10000 + 5000
       // generate again
       setTimeout(generate, delay);
     } catch (error) {
