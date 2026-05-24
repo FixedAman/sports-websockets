@@ -39,7 +39,7 @@ server.listen(PORT, HOST, async () => {
   const allMatches = await db.select().from(matches);
   if (allMatches) {
     for (let match of allMatches) {
-      startCommentary(match, broadcastCommentary);
+      startCommentary(match , broadcastCommentary);
     }
   }
   console.log("all matches : ", allMatches);
