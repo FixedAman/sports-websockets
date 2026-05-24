@@ -1,6 +1,8 @@
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import db from "../db/db.js";
 import { commentary, matches } from "../db/schema.js";
+import { createCommentarySchema } from "../validation/commentary.js";
+import { it } from "zod/locales";
 
 // random players
 const players = [
@@ -43,7 +45,6 @@ const commentaryTemplates = [
   },
   {
     eventType: "corner",
-
     tags: ["setpiece"],
 
     messages: [
@@ -87,13 +88,26 @@ export async function startCommentary(match, broadcastCommentary) {
   const teams = [match.homeTeam, match.awayTeam];
   let minute = 1;
   let sequence = 1;
+  // take the status
+  await db
+    .update(matches)
+    .set({ status: "Live" })
+    .where(eq(matches.id, matchId));
   async function generate() {
     try {
       // randome template
-      const template =
-        commentaryTemplates[
-          Math.floor(Math.random() * commentaryTemplates.length)
-        ];
+      const goalChance = Math.random() < 0.1;
+      let template;
+      if (goalChance) {
+        template = commentaryTemplates.find((evt) => evt.eventType === "goal");
+      } else {
+        const nonGoalTemplates = commentaryTemplates.filter(
+          (item) => item.eventType !== "goal",
+        );
+
+        template =
+          nonGoalTemplates[Math.floor(Math.random() * nonGoalTemplates.length)];
+      }
 
       // random player
       const actor = players[Math.floor(Math.random() * players.length)];
@@ -122,7 +136,19 @@ export async function startCommentary(match, broadcastCommentary) {
         .select()
         .from(matches)
         .where(eq(matches.id, matchId));
-      
+      // finishing match if score is 10
+      if (updatedMatch.homeScore >= 10 || updatedMatch.awayScore >= 10) {
+        await db
+          .update(matches)
+          .set({ status: "finished" })
+          .where(eq(matches.id, matchId));
+        broadcastCommentary(matchId, {
+          type: "Match Finished",
+          homeScore: updatedMatch.homeScore,
+          awayScore: updatedMatch.awayScore,
+        });
+        return;
+      }
       // random message
       const message =
         template.messages[Math.floor(Math.random() * template.messages.length)];
@@ -139,10 +165,15 @@ export async function startCommentary(match, broadcastCommentary) {
         metaData: template.metaData(),
         tags: template.tags,
       };
+      const validated = createCommentarySchema.safeParse(commentaryData);
+      if (!validated.success) {
+        console.error(validated.error);
+        return;
+      }
       //inserting
       const [savedCommentary] = await db
         .insert(commentary)
-        .values(commentaryData)
+        .values(validated.data)
         .returning();
       // broadCast to the user
       broadcastCommentary(matchId, {
@@ -171,7 +202,7 @@ export async function startCommentary(match, broadcastCommentary) {
       minute++;
       sequence++;
       // random  delay
-      const delay = Math.random() * 10000 + 5000
+      const delay = Math.random() * 10000 + 5000;
       // generate again
       setTimeout(generate, delay);
     } catch (error) {
