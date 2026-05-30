@@ -11,6 +11,7 @@ import { commentaryRoute } from "./routes/commentary.js";
 import db from "./db/db.js";
 import { matches } from "./db/schema.js";
 import { startCommentary } from "./services/commentaryGenerator.js";
+import { createMatch } from "./services/matchesManager.js";
 const app = express();
 const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -39,8 +40,10 @@ server.listen(PORT, HOST, async () => {
   const allMatches = await db.select().from(matches);
   if (allMatches) {
     for (let match of allMatches) {
-      startCommentary(match , broadcastCommentary);
+      startCommentary(match, broadcastCommentary);
     }
   }
-  console.log("all matches : ", allMatches);
+  setInterval(() => {
+    createMatch();
+  }, 1000);
 });

@@ -23,8 +23,8 @@ export const createMatchSchema = z
     sport: z.string().min(1),
     homeTeam: z.string().min(1),
     awayTeam: z.string().min(1),
-    startTime: isoDateString,
-    endTime: isoDateString,
+    startTime: z.date(),
+    endTime: z.date(),
     homeScore: z.coerce.number().int().nonnegative().optional(),
     awayScore: z.coerce.number().int().nonnegative().optional(),
   })
@@ -32,7 +32,7 @@ export const createMatchSchema = z
     const start = new Date(data.startTime);
     const end = new Date(date.endTime);
     if (end <= start) {
-      ctx.addIssue({ 
+      ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "endTime must be chronogically after start time !",
         path: ["endTime"],

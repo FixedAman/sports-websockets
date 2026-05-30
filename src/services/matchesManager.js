@@ -1,3 +1,4 @@
+import { count, eq } from "drizzle-orm";
 import db from "../db/db.js";
 import { matches } from "../db/schema.js";
 import { createMatchSchema } from "../validation/matches.js";
@@ -25,16 +26,27 @@ function randomTeam() {
     awayTeam: shuffled[1],
   };
 }
-const now = new Date();
-const startTime = new Date(now.getTime() + 30000);
-const endTime = new Date(now.getTime() + 8 * 60 * 1000);
-const { homeTeam, awayTeam } = randomTeam();
 
-const createMatch = async () => {
-  const query = await db.select().from(matches);
-  if (query.length >= 5) {
+export const createMatch = async () => {
+  const { homeTeam, awayTeam } = randomTeam();
+
+  let startTime = new Date(Date.now());
+  let endTime = new Date(Date.now() + 8 * 60 * 1000);
+
+  // deleting finished matches !!
+  const finishedMatches = await db
+    .select()
+    .from(matches)
+    .where(eq(matches.status, "finished"));
+  if (finishedMatches.length > 0) {
+    await db.delete(matches).where(eq(matches.id, finishedMatches.id));
+  }
+
+  const allMatches = await db.select().from(matches);
+  if (allMatches.length >= 5) {
     return;
   }
+
   const data = {
     sport: "football",
     homeTeam,
@@ -45,11 +57,10 @@ const createMatch = async () => {
     homeScore: 0,
     awayScore: 0,
   };
-
-  const [match] = await db
-    .insert(matches)
-    .values(createMatchSchema.safeParse(data))
-    .returning();
+  const validated = createMatchSchema.safeParse(data);
+  if (!validated.success) {
+    console.error(validated.error);
+    return;
+  }
+  await db.insert(matches).values(validated.data).returning();
 };
-
-console.log(query);
