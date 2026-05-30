@@ -170,6 +170,10 @@ export async function startCommentary(match, broadcastCommentary) {
         console.error(validated.error);
         return;
       }
+      console.log("this is data from commentary : ", commentaryData);
+      console.log("matchObject", match);
+      console.log("matchId", matchId);
+      console.log("validation from zod " , validated.data)
       //inserting
       const [savedCommentary] = await db
         .insert(commentary)
