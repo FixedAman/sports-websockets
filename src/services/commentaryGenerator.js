@@ -137,11 +137,23 @@ export async function startCommentary(match, broadcastCommentary) {
         .from(matches)
         .where(eq(matches.id, matchId));
       // finishing match if score is 10
-      if (updatedMatch.homeScore >= 10 || updatedMatch.awayScore >= 10) {
+      if (updatedMatch.homeScore === 10 || updatedMatch.awayScore === 10) {
         await db
           .update(matches)
           .set({ status: "finished" })
           .where(eq(matches.id, matchId));
+        // deleting the data
+        const allfinishedMatches = await db
+          .select()
+          .from(matches)
+          .where(eq(match.status, "finished"));
+        if (allfinishedMatches.length > 0) {
+          try {
+            await db.delete(matches).where(eq(matches.status, "finished"));
+          } catch (e) {
+            console.log("something happend in allFinished matches section");
+          }
+        }
         broadcastCommentary(matchId, {
           type: "Match Finished",
           homeScore: updatedMatch.homeScore,
@@ -149,6 +161,7 @@ export async function startCommentary(match, broadcastCommentary) {
         });
         return;
       }
+
       // random message
       const message =
         template.messages[Math.floor(Math.random() * template.messages.length)];
@@ -170,10 +183,6 @@ export async function startCommentary(match, broadcastCommentary) {
         console.error(validated.error);
         return;
       }
-      console.log("this is data from commentary : ", commentaryData);
-      console.log("matchObject", match);
-      console.log("matchId", matchId);
-      console.log("validation from zod " , validated.data)
       //inserting
       const [savedCommentary] = await db
         .insert(commentary)
@@ -187,12 +196,13 @@ export async function startCommentary(match, broadcastCommentary) {
           away: updatedMatch.awayScore,
         },
       });
+      
       const rows = await db
         .select({ id: commentary.id })
         .from(commentary)
         .where(eq(commentary.matchId, matchId))
         .orderBy(desc(commentary.createdAt));
-
+      console.log("rows count" ,rows.length);
       // cleanup rows
       if (rows.length > 50) {
         const rowsToDelete = rows.slice(50);
