@@ -83,7 +83,11 @@ const commentaryTemplates = [
 ];
 
 // commentarystarting
-export async function startCommentary(match, broadcastCommentary) {
+export async function startCommentary(
+  match,
+  broadcastCommentary,
+  broadcastAllMatchScoreUpdate,
+) {
   let matchId = match.id;
   const teams = [match.homeTeam, match.awayTeam];
   let minute = 1;
@@ -136,6 +140,9 @@ export async function startCommentary(match, broadcastCommentary) {
         .select()
         .from(matches)
         .where(eq(matches.id, matchId));
+      // update score
+      broadcastAllMatchScoreUpdate(updatedMatch)
+
       // finishing match if score is 10
       if (updatedMatch.homeScore === 10 || updatedMatch.awayScore === 10) {
         await db

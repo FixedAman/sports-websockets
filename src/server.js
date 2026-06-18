@@ -31,11 +31,15 @@ app.use(securityMiddleware());
 app.use("/", matchRouter);
 app.use("/matches", matchRouter);
 app.use("/matches/:id/commentary", commentaryRoute);
-const { broadcastMatchCreated, broadcastCommentary } =
-  attachWebSocketServer(server);
+const {
+  broadcastMatchCreated,
+  broadcastCommentary,
+  broadcastAllMatchScoreUpdate,
+} = attachWebSocketServer(server);
 
 app.locals.broadcastMatchCreated = broadcastMatchCreated;
 app.locals.broadcastCommentary = broadcastCommentary;
+app.locals.broadcastAllMatchScoreUpdate = broadcastAllMatchScoreUpdate;
 server.listen(PORT, HOST, async () => {
   const baseUrl =
     HOST === "0.0.0.0" ? `http://localhost:${PORT}` : `http://${HOST}:${PORT}`;
@@ -45,7 +49,7 @@ server.listen(PORT, HOST, async () => {
   const allMatches = await db.select().from(matches);
   if (allMatches) {
     for (let match of allMatches) {
-      startCommentary(match, broadcastCommentary);
+      startCommentary(match, broadcastCommentary, broadcastAllMatchScoreUpdate);
     }
   }
   setInterval(() => {
