@@ -12,10 +12,15 @@ import db from "./db/db.js";
 import { matches } from "./db/schema.js";
 import { startCommentary } from "./services/commentaryGenerator.js";
 import { createMatch } from "./services/matchesManager.js";
+import cors from "cors";
 const app = express();
 const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "0.0.0.0";
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
 app.use(express.json());
 const server = http.createServer(app);
 app.use((req, res, next) => {

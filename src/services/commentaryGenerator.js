@@ -196,13 +196,13 @@ export async function startCommentary(match, broadcastCommentary) {
           away: updatedMatch.awayScore,
         },
       });
-      
+
       const rows = await db
         .select({ id: commentary.id })
         .from(commentary)
         .where(eq(commentary.matchId, matchId))
         .orderBy(desc(commentary.createdAt));
-      console.log("rows count" ,rows.length);
+      console.log("rows count", rows.length);
       // cleanup rows
       if (rows.length > 50) {
         const rowsToDelete = rows.slice(50);
@@ -220,7 +220,7 @@ export async function startCommentary(match, broadcastCommentary) {
       // generate again
       setTimeout(generate, delay);
     } catch (error) {
-      console.error("generation error:", error);
+      console.error("generation error here:", error);
     }
   }
   generate();

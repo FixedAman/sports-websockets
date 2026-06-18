@@ -2,8 +2,9 @@ import { useState } from "react";
 
 const Header = () => {
   const [isConnected, setIsconnected] = useState(true);
+  
   return (
-    <header className="w-full border-b-4 border-black bg-yellow-300 shadow-[4px_4px_0px_black]">
+    <header className="w-full border-b-4 border-black bg-blue-300 shadow-[4px_4px_0px_black]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         {/* Logo Section */}
         <div>
