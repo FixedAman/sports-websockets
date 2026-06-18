@@ -23,7 +23,8 @@ useEffect(()=>{
 const ws = new WebSocket("ws://localhost:8000/ws")
 ws.onmessage = (event)=>{
   const updatedMatch = JSON.parse(event.data)
-  setMatches((prev)=>prev.map((m)=>m.id === updatedMatch.id ? updatedMatch : m))
+  const curr = updatedMatch.data
+  setMatches((prev)=>prev.map((m)=>m.id === curr.id ? curr : m))
 }
 return ()=> ws.close()
 },[])

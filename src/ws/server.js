@@ -54,6 +54,9 @@ export function attachWebSocketServer(server) {
   function broadcastMatchCreated(match) {
     broadcastToAll(wss, { type: "match_created", data: match });
   }
+  function broadcastAllMatchScoreUpdate(match) {
+    broadcastToAll(wss, { type: "score update ", data: match });
+  }
   function broadcastCommentary(matchId, comment) {
     broadcastToMatch(matchId, { type: "commentary", data: comment });
   }
@@ -140,5 +143,5 @@ export function attachWebSocketServer(server) {
     });
   });
 
-  return { broadcastMatchCreated, broadcastCommentary };
+  return { broadcastMatchCreated, broadcastCommentary  ,broadcastAllMatchScoreUpdate};
 }
