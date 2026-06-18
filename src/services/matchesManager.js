@@ -34,13 +34,13 @@ export const createMatch = async () => {
   let endTime = new Date(Date.now() + 8 * 60 * 1000);
 
   // deleting finished matches !!
-  const finishedMatches = await db
-    .select()
-    .from(matches)
-    .where(eq(matches.status, "finished"));
-  if (finishedMatches.length > 0) {
-    await db.delete(matches).where(eq(matches.id, finishedMatches.id));
-  }
+  // const finishedMatches = await db
+  //   .select()
+  //   .from(matches)
+  //   .where(eq(matches.status, "finished"));
+  // if (finishedMatches.length > 0) {
+  //   await db.delete(matches).where(eq(matches.id, finishedMatches.id));
+  // }
 
   const allMatches = await db.select().from(matches);
   if (allMatches.length >= 5) {
