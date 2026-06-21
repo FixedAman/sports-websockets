@@ -5,7 +5,18 @@ import { Match, MatchCardProps } from "../types/match";
 
 const MatchCard = ({ match } : MatchCardProps ) => {
 const [isLive , setIsLive ] = useState(false)
-
+const [isOpen , setIsOpen] = useState(false)
+const handleClick = (id : number)=>{
+const ws = new WebSocket("ws://localhost:8000/ws")
+ws.onopen = ()=>{
+  ws.send(JSON.stringify({type: "subscribe" , matchId: id}))
+  ws.onmessage = (event)=>{
+   const data  =JSON.parse(event.data)
+   console.log(data)
+  }
+}
+setIsOpen(!false)
+}
   return (
   <div className="w-full rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[6px_6px_0px_#000] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000]">
   
@@ -51,8 +62,12 @@ const [isLive , setIsLive ] = useState(false)
     <span className="text-sm text-zinc-500">
       Live Match
     </span>
-
-    <button className="rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-bold transition hover:scale-105">
+    {
+      isOpen ?   <button className="rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-bold transition hover:scale-105" >
+      close
+    </button> : " "
+    }
+    <button className="rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-bold transition hover:scale-105" onClick={(e)=>handleClick(match.id)}>
       View
     </button>
   </div>
