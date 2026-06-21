@@ -134,14 +134,18 @@ export async function startCommentary(
             .set({ awayScore: sql`${matches.awayScore} + 1` })
             .where(eq(matches.id, matchId));
         }
+        const [updatedMatch] = await db
+          .select()
+          .from(matches)
+          .where(eq(matches.id, matchId));
+        // update score
+        broadcastAllMatchScoreUpdate(updatedMatch);
       }
       // update score
       const [updatedMatch] = await db
         .select()
         .from(matches)
         .where(eq(matches.id, matchId));
-      // update score
-      broadcastAllMatchScoreUpdate(updatedMatch)
 
       // finishing match if score is 10
       if (updatedMatch.homeScore === 10 || updatedMatch.awayScore === 10) {
