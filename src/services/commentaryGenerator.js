@@ -93,10 +93,16 @@ export async function startCommentary(
   let minute = 1;
   let sequence = 1;
   // take the status
-  await db
-    .update(matches)
-    .set({ status: "Live" })
+  const [matchstatus] = await db
+    .select({ status: matches.status })
+    .from(matches)
     .where(eq(matches.id, matchId));
+  if (matchstatus.status !== "Live") {
+    await db
+      .update(matches)
+      .set({ status: "Live" })
+      .where(eq(matches.id, matchId));
+  }
   async function generate() {
     try {
       // randome template
@@ -157,7 +163,7 @@ export async function startCommentary(
         const allfinishedMatches = await db
           .select()
           .from(matches)
-          .where(eq(match.status, "finished"));
+          .where(eq(matches.status, "finished"));
         if (allfinishedMatches.length > 0) {
           try {
             await db.delete(matches).where(eq(matches.status, "finished"));
