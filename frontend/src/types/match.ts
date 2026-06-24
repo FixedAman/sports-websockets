@@ -33,9 +33,9 @@ export type Commentary = {
 export interface MatchCardProps {
   match: Match;
   setCommentary: Dispatch<SetStateAction<Commentary[]>>;
-  isLoading : boolean
+  watchingMatchId: number | null;
+  setWatchingMatchId: Dispatch<SetStateAction<number | null>>;
 }
 export type MatchListCommentary = {
   setCommentary: Dispatch<SetStateAction<Commentary[]>>;
-  
 };

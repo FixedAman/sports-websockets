@@ -7,7 +7,6 @@ type CommentaryFeedProps = {
 };
 
 const CommentaryFeed = ({ commentary }: CommentaryFeedProps) => {
-  console.log(commentary)
   return (
     <aside className="h-[80vh] w-full max-w-[380px] overflow-y-auto rounded-3xl border-2 border-black bg-white shadow-[6px_6px_0px_#000]">
       {/* Header */}
