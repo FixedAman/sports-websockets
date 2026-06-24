@@ -1,23 +1,32 @@
-import { useState } from "react";
-import { Match, MatchCardProps } from "../types/match";
 
-
-
-const MatchCard = ({ match } : MatchCardProps ) => {
-const [isLive , setIsLive ] = useState(false)
-const [isOpen , setIsOpen] = useState(false)
+import { MatchCardProps } from "../types/match";
+const MatchCard = ({ match ,  setCommentary , setWatchingMatchId , watchingMatchId } : MatchCardProps ) => {
+const isWatchingMatch = watchingMatchId === match.id
 const handleClick = (id : number)=>{
 const ws = new WebSocket("ws://localhost:8000/ws")
 ws.onopen = ()=>{
   ws.send(JSON.stringify({type: "subscribe" , matchId: id}))
   ws.onmessage = (event)=>{
-   const data  =JSON.parse(event.data)
-   console.log(data)
+      const data =JSON.parse(event.data)
+      if(data.type === "commentary"){
+        setCommentary((prev)=>[
+          data.data.commentary ,
+          ...prev
+        ])
+      }
+    }
+  }
+setWatchingMatchId(id)
+}
+const handleClose  = (id :number)=>{
+  const ws = new WebSocket("ws://localhost:8000/ws")
+  ws.onopen= ()=>{
+  ws.send(JSON.stringify({type : "unsubscribe" , mathcId: id}))
+  setCommentary([])
   }
 }
-setIsOpen(!false)
-}
   return (
+  
   <div className="w-full rounded-[28px] border-[3px] border-black bg-white p-5 shadow-[6px_6px_0px_#000] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000]">
   
   {/* Top */}
@@ -45,7 +54,6 @@ setIsOpen(!false)
         {match.homeScore}
       </div>
     </div>
-
     <div className="flex items-center justify-between">
       <h3 className="text-lg font-bold">
         {match.awayTeam}
@@ -62,17 +70,15 @@ setIsOpen(!false)
     <span className="text-sm text-zinc-500">
       Live Match
     </span>
-    {
-      isOpen ?   <button className="rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-bold transition hover:scale-105" >
-      close
-    </button> : " "
-    }
-    <button className="rounded-full border-2 border-black bg-yellow-300 px-4 py-2 text-sm font-bold transition hover:scale-105" onClick={(e)=>handleClick(match.id)}>
-      View
+    <button className="rounded-full border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold transition hover:scale-105 cursor-pointer" onClick={()=>handleClick(match.id)}>
+    { isWatchingMatch ? <p>Watching Live</p> : <p>Watch Live</p>  }
     </button>
+    {
+      isWatchingMatch && <button className="rounded-full border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold transition hover:scale-105 cursor-pointer" onClick={()=>handleClose(match.id)}> close </button>
+    }
   </div>
+
 </div>
   );
-};
-
+}
 export default MatchCard;

@@ -13,6 +13,7 @@ import { matches } from "./db/schema.js";
 import { startCommentary } from "./services/commentaryGenerator.js";
 import { createMatch } from "./services/matchesManager.js";
 import cors from "cors";
+import { eq } from "drizzle-orm";
 const app = express();
 const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "0.0.0.0";
@@ -52,7 +53,14 @@ server.listen(PORT, HOST, async () => {
       startCommentary(match, broadcastCommentary, broadcastAllMatchScoreUpdate);
     }
   }
-  setInterval(() => {
+  setInterval(async () => {
+    const scheduledMatches = await db
+      .select()
+      .from(matches)
+      .where(eq(matches.status, "scheduled"));
+    for (let match of scheduledMatches) {
+      startCommentary(match, broadcastCommentary, broadcastAllMatchScoreUpdate);
+    }
     createMatch();
-  }, 1000);
+  }, 60000);
 });
