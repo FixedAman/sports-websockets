@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, RefObject, SetStateAction } from "react";
 import MatchCard from "../components/MatchCard";
 
 export type Match = {
@@ -17,7 +17,7 @@ export type Match = {
 // };
 
 export type Commentary = {
-  id: number;
+  id: number; 
   matchId: number;
   actor: string;
   message: string;
@@ -35,6 +35,8 @@ export interface MatchCardProps {
   setCommentary: Dispatch<SetStateAction<Commentary[]>>;
   watchingMatchId: number | null;
   setWatchingMatchId: Dispatch<SetStateAction<number | null>>;
+  handleWatchMatch: (newMatchId: number) => void;
+  wsRef: RefObject<WebSocket | null> ;
 }
 export type MatchListCommentary = {
   setCommentary: Dispatch<SetStateAction<Commentary[]>>;

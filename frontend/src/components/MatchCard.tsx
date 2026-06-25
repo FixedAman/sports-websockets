@@ -1,12 +1,16 @@
 
 import { MatchCardProps } from "../types/match";
-const MatchCard = ({ match ,  setCommentary , setWatchingMatchId , watchingMatchId } : MatchCardProps ) => {
-const isWatchingMatch = watchingMatchId === match.id
+const MatchCard = ({ match ,  setCommentary , setWatchingMatchId , watchingMatchId , handleWatchMatch , wsRef} : MatchCardProps ) => {
+let isWatchingMatch = watchingMatchId === match.id
 const handleClick = (id : number)=>{
-const ws = new WebSocket("ws://localhost:8000/ws")
-ws.onopen = ()=>{
-  ws.send(JSON.stringify({type: "subscribe" , matchId: id}))
-  ws.onmessage = (event)=>{
+  
+if(!wsRef.current){
+    throw new Error("useRef is null probably check the matchList")
+  }  
+if(wsRef.current.readyState === WebSocket.OPEN){
+wsRef.current?.send(JSON.stringify({type: "subscribe" , matchId: id}))
+ console.log(JSON.stringify({type:"subscribe" , matchId : id}))
+  wsRef.current!.onmessage = (event)=>{
       const data =JSON.parse(event.data)
       if(data.type === "commentary"){
         setCommentary((prev)=>[
@@ -14,15 +18,22 @@ ws.onopen = ()=>{
           ...prev
         ])
       }
-    }
+    
   }
+}
+  
 setWatchingMatchId(id)
+handleWatchMatch(id)
 }
 const handleClose  = (id :number)=>{
-  const ws = new WebSocket("ws://localhost:8000/ws")
-  ws.onopen= ()=>{
-  ws.send(JSON.stringify({type : "unsubscribe" , mathcId: id}))
+  
+  if(!wsRef.current){
+    throw new Error("useRef is null probably check the matchList")
+  }  
+  if(wsRef.current.readyState === WebSocket.OPEN){
+ wsRef.current?.send(JSON.stringify({type : "unsubscribe" , matchId: id}))
   setCommentary([])
+ setWatchingMatchId(null)
   }
 }
   return (
@@ -66,17 +77,29 @@ const handleClose  = (id :number)=>{
   </div>
 
   {/* Footer */}
-  <div className="mt-6 border-t-2 border-zinc-200 pt-4 flex items-center justify-between">
-    <span className="text-sm text-zinc-500">
-      Live Match
-    </span>
-    <button className="rounded-full border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold transition hover:scale-105 cursor-pointer" onClick={()=>handleClick(match.id)}>
-    { isWatchingMatch ? <p>Watching Live</p> : <p>Watch Live</p>  }
+  <div className="mt-6 flex items-center justify-between border-t-2 border-zinc-200 pt-4">
+  <span className="text-sm text-zinc-500">
+    Live Match
+  </span>
+
+  <div className="flex items-center gap-3">
+    <button
+      className="rounded-full border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold transition hover:scale-105"
+      onClick={() => handleClick(match.id)}
+    >
+      {isWatchingMatch ? "Watching Live" : "Watch Live"}
     </button>
-    {
-      isWatchingMatch && <button className="rounded-full border-2 border-black bg-blue-300 px-4 py-2 text-sm font-bold transition hover:scale-105 cursor-pointer" onClick={()=>handleClose(match.id)}> close </button>
-    }
+
+    {isWatchingMatch && (
+      <button
+        className="rounded-full border-2 border-black bg-red-300 px-4 py-2 text-sm font-bold transition hover:scale-105"
+        onClick={() => handleClose(match.id)}
+      >
+        Close
+      </button>
+    )}
   </div>
+</div>
 
 </div>
   );

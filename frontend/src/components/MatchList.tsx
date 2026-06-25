@@ -41,9 +41,11 @@ const handleWatchMatch = (newMatchId : number )=>{
     wsRef.current?.send (
    JSON.stringify({type : "unsubscribe" , matchId : watchingMatchId})
    )
+  
    }else {
     console.error("something went wrong please check onthe handleWatchMatch")
    }
+    setCommentary([])
   setWatchingMatchId(newMatchId)
  }
 }
@@ -66,14 +68,13 @@ const handleWatchMatch = (newMatchId : number )=>{
         setCommentary={setCommentary}
         watchingMatchId={watchingMatchId}
         setWatchingMatchId={setWatchingMatchId}
-
+       handleWatchMatch={handleWatchMatch}
+       wsRef={wsRef}
       />
     ))
     }
    
   </div>
-
-
 </div>
  
   </>
