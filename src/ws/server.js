@@ -60,6 +60,9 @@ export function attachWebSocketServer(server) {
   function broadcastCommentary(matchId, comment) {
     broadcastToMatch(matchId, { type: "commentary", data: comment });
   }
+  function broadcastFinishedMatches(matchId, match) {
+    broadcastToAll(wss, { type: "match_finished", data: match });
+  }
   //handle message
   function handleMessage(socket, data) {
     console.log("handleMessageData", data);
@@ -143,5 +146,10 @@ export function attachWebSocketServer(server) {
     });
   });
 
-  return { broadcastMatchCreated, broadcastCommentary  ,broadcastAllMatchScoreUpdate};
+  return {
+    broadcastMatchCreated,
+    broadcastCommentary,
+    broadcastAllMatchScoreUpdate,
+    broadcastFinishedMatches
+  };
 }

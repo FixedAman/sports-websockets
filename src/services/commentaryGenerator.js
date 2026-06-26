@@ -87,6 +87,7 @@ export async function startCommentary(
   match,
   broadcastCommentary,
   broadcastAllMatchScoreUpdate,
+  broadcastFinishedMatches,
 ) {
   let matchId = match.id;
   const teams = [match.homeTeam, match.awayTeam];
@@ -173,7 +174,9 @@ export async function startCommentary(
         }
         broadcastCommentary(matchId, {
           type: "Match_Finished",
-          matchId: updatedMatch.id,
+        });
+        broadcastFinishedMatches(matchId, {
+          id: updatedMatch.id,
           homeScore: updatedMatch.homeScore,
           awayScore: updatedMatch.awayScore,
         });
