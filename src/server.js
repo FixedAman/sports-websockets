@@ -20,7 +20,6 @@ const HOST = process.env.HOST || "0.0.0.0";
 app.use(
   cors({
     origin: "http://localhost:5173",
-    
   }),
 );
 app.use(express.json());
@@ -37,11 +36,13 @@ const {
   broadcastMatchCreated,
   broadcastCommentary,
   broadcastAllMatchScoreUpdate,
+  broadcastFinishedMatches,
 } = attachWebSocketServer(server);
 
 app.locals.broadcastMatchCreated = broadcastMatchCreated;
 app.locals.broadcastCommentary = broadcastCommentary;
 app.locals.broadcastAllMatchScoreUpdate = broadcastAllMatchScoreUpdate;
+app.locals.broadcastFinishedMatches = broadcastFinishedMatches;
 server.listen(PORT, HOST, async () => {
   const baseUrl =
     HOST === "0.0.0.0" ? `http://localhost:${PORT}` : `http://${HOST}:${PORT}`;
@@ -51,7 +52,12 @@ server.listen(PORT, HOST, async () => {
   const allMatches = await db.select().from(matches);
   if (allMatches) {
     for (let match of allMatches) {
-      startCommentary(match, broadcastCommentary, broadcastAllMatchScoreUpdate);
+      startCommentary(
+        match,
+        broadcastCommentary,
+        broadcastAllMatchScoreUpdate,
+        broadcastFinishedMatches,
+      );
     }
   }
   setInterval(async () => {
@@ -60,8 +66,13 @@ server.listen(PORT, HOST, async () => {
       .from(matches)
       .where(eq(matches.status, "scheduled"));
     for (let match of scheduledMatches) {
-      startCommentary(match, broadcastCommentary, broadcastAllMatchScoreUpdate);
+      startCommentary(
+        match,
+        broadcastCommentary,
+        broadcastAllMatchScoreUpdate,
+        broadcastFinishedMatches,
+      );
     }
-    createMatch();
+  await  createMatch();
   }, 60000);
 });

@@ -41,7 +41,10 @@ wsRef.current.onmessage = (event)=>{
       ])
 
     }
-    break
+    break;
+   case "match_finished":{
+    setMatches((prev)=>prev.filter((m)=> m.id  !== updatedMatch.data.id))
+   }
   }
  
 }
