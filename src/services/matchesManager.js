@@ -27,7 +27,7 @@ function randomTeam() {
   };
 }
 
-export const createMatch = async () => {
+export const createMatch = async (broadcastMatchCreated) => {
   const { homeTeam, awayTeam } = randomTeam();
 
   let startTime = new Date(Date.now());
@@ -62,5 +62,9 @@ export const createMatch = async () => {
     console.error(validated.error);
     return;
   }
-  await db.insert(matches).values(validated.data).returning();
+  const [newMatch] = await db
+    .insert(matches)
+    .values(validated.data)
+    .returning();
+  broadcastMatchCreated(newMatch);
 };

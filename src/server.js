@@ -73,6 +73,6 @@ server.listen(PORT, HOST, async () => {
         broadcastFinishedMatches,
       );
     }
-  await  createMatch();
+  await  createMatch(broadcastMatchCreated);
   }, 60000);
 });
