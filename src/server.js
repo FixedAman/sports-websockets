@@ -19,7 +19,10 @@ const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "0.0.0.0";
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://sports-websockets-ten.vercel.app/",
+    ],
   }),
 );
 app.use(express.json());
@@ -73,6 +76,6 @@ server.listen(PORT, HOST, async () => {
         broadcastFinishedMatches,
       );
     }
-  await  createMatch(broadcastMatchCreated);
+    await createMatch(broadcastMatchCreated);
   }, 60000);
 });

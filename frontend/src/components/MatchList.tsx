@@ -3,7 +3,6 @@ import { fetchingMatchData } from "../services/api"
 import { Match, MatchListCommentary } from "../types/match"
 import MatchCard from "./MatchCard"
 
-
 const MatchList = ({setCommentary} :MatchListCommentary  )=>{
 const [matches , setMatches] = useState<Match[]>([])
 const [isLoading , setLoading] = useState(true)
