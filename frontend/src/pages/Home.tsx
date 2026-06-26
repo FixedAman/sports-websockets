@@ -10,15 +10,17 @@ const Home = () => {
   return (
     <>
       <Header />
-      <div className="mx-auto flex max-w-7xl gap-6 px-6 py-8 ">
-        {/* Left Side */}
-        <div className="flex-1">
-          <MatchList setCommentary={setCommentary} />
-        </div>
+       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:flex-row lg:px-6 lg:py-8">
+    {/* Match List */}
+    <div className="flex-1">
+      <MatchList setCommentary={setCommentary} />
+    </div>
 
-        {/* Right Sidebar */}
-        <CommentaryFeed commentary={commentary} />
-      </div>
+    {/* Commentary */}
+    <div className="w-full lg:w-[380px] lg:shrink-0">
+      <CommentaryFeed commentary={commentary} />
+    </div>
+  </div>
     </>
   );
 };

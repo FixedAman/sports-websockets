@@ -26,11 +26,24 @@ data()
 
 // creating websocket for fetching data 
 useEffect(()=>{
-wsRef.current = new WebSocket("ws://localhost:8000/ws")
+wsRef.current = new WebSocket("wss://sports-websockets.onrender.com/ws")
+wsRef.current.onopen = ()=>console.log("websocket connected")
 wsRef.current.onmessage = (event)=>{
   const updatedMatch = JSON.parse(event.data)
-  const curr = updatedMatch?.data
-  setMatches((prev)=>prev.map((m)=>m.id === curr?.id ? curr : m))
+  switch(updatedMatch.type){
+    case "score_update" : {
+      setMatches((prev)=>prev.map((m)=>m.id === updatedMatch.data.id ? updatedMatch.data : m))
+    }
+    break;
+    case "commentary": {
+      setCommentary((prev)=>[updatedMatch.data.commentary ,
+        ...prev
+      ])
+
+    }
+    break
+  }
+ 
 }
 return ()=> wsRef.current?.close()
 },[])
@@ -50,30 +63,29 @@ const handleWatchMatch = (newMatchId : number )=>{
  }
 }
   return <>
-<div className="max-w-7xl mx-auto px-4 py-8">
-  <h1 className="text-3xl font-bold mb-6">
+<div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+  <h1 className="mb-6 text-2xl font-bold sm:text-3xl">
     Current Matches
   </h1>
 
-  <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-    {
-      isLoading ? (
-    <div className="flex justify-center items-center h-40 col-span-full">
-      <div className="w-10 h-10 border-4 border-zinc-700 border-t-blue-700 rounded-full animate-spin" />
-    </div>
-  ) : matches.map((m) => (
-      <MatchCard
-        key={m.id}
-        match={m} 
-        setCommentary={setCommentary}
-        watchingMatchId={watchingMatchId}
-        setWatchingMatchId={setWatchingMatchId}
-       handleWatchMatch={handleWatchMatch}
-       wsRef={wsRef}
-      />
-    ))
-    }
-   
+  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+    {isLoading ? (
+      <div className="col-span-full flex h-40 items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-300 border-t-blue-600" />
+      </div>
+    ) : (
+      matches.map((m) => (
+        <MatchCard
+          key={m.id}
+          match={m}
+          setCommentary={setCommentary}
+          watchingMatchId={watchingMatchId}
+          setWatchingMatchId={setWatchingMatchId}
+          handleWatchMatch={handleWatchMatch}
+          wsRef={wsRef}
+        />
+      ))
+    )}
   </div>
 </div>
  
