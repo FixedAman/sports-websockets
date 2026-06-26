@@ -172,7 +172,8 @@ export async function startCommentary(
           }
         }
         broadcastCommentary(matchId, {
-          type: "Match Finished",
+          type: "Match_Finished",
+          matchId: updatedMatch.id,
           homeScore: updatedMatch.homeScore,
           awayScore: updatedMatch.awayScore,
         });
