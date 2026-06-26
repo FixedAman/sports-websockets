@@ -9,17 +9,8 @@ if(!wsRef.current){
   }  
 if(wsRef.current.readyState === WebSocket.OPEN){
 wsRef.current?.send(JSON.stringify({type: "subscribe" , matchId: id}))
+console.log(wsRef.current)
  console.log(JSON.stringify({type:"subscribe" , matchId : id}))
-  wsRef.current!.onmessage = (event)=>{
-      const data =JSON.parse(event.data)
-      if(data.type === "commentary"){
-        setCommentary((prev)=>[
-          data.data.commentary ,
-          ...prev
-        ])
-      }
-    
-  }
 }
   
 setWatchingMatchId(id)

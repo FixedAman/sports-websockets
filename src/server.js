@@ -20,6 +20,7 @@ const HOST = process.env.HOST || "0.0.0.0";
 app.use(
   cors({
     origin: "http://localhost:5173",
+    
   }),
 );
 app.use(express.json());
